@@ -6,8 +6,16 @@
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
 1. Clonar repositorio
-2. instalar dependencias
+2. Instalar dependencias
 ```
 yarn install
 ```
-3. renombrar `.env.template` a `.env` y configurar sus variables  
+3. Renombrar `.env.template` a `.env` y configurar sus variables 
+4. Ejecutar migración de prisma
+```
+yarn prisma migrate dev
+```
+5. levantar aplicación
+```
+yarn run start:dev
+```
