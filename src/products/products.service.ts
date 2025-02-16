@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable, InternalServerErrorException, Logger, OnModuleInit } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaClient } from '@prisma/client';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { RpcException } from '@nestjs/microservices';
 
 
 @Injectable()
@@ -51,7 +52,12 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   async findOne(id: number) {
     const product = await this.product.findFirst({where:{id,available:true}})
     if(!product){
-      throw new NotFoundException(`product with id ${id} not found`)
+      throw new RpcException(
+        {
+          status:HttpStatus.NOT_FOUND,
+          message:`product with id #${id} not found`
+        }
+      )
     }
 
     return product;
@@ -83,10 +89,20 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
   private handleErrors(error:any){
     if(error.code === "P2025"){
-      throw new BadRequestException(`product to update or delete not found`)
+      throw new RpcException(
+        {
+          status:HttpStatus.NOT_FOUND,
+          message:`product to update/delete not found`
+        }
+      )
     }
     this.logger.error(error.meta.cause)
-    throw new InternalServerErrorException('Something failed, check logs')
+    throw new RpcException(
+      {
+        status:HttpStatus.INTERNAL_SERVER_ERROR,
+        message:'Something failed, check logs'
+      }
+    )
   }
 
 
